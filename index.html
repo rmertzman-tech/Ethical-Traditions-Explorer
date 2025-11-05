@@ -1,915 +1,1647 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ethics Assembly History Lab - Enhanced</title>
-    
+    <title>Historical Traditions Explorer: Meta-Constructor Lens</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        .chart-container {
-            position: relative;
-            height: 300px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .chart-bar {
-            display: inline-block;
-            margin: 0 2px;
-            border-radius: 4px 4px 0 0;
-            transition: all 0.3s;
-        }
-        .chart-bar:hover {
-            opacity: 0.8;
-            transform: translateY(-2px);
+        body {
+            font-family: 'Inter', sans-serif;
         }
         
-        /* AI Tutor styles */
-        .tutor-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+        .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transition: transform 0.3s;
-        }
-        .tutor-button:hover {
-            transform: scale(1.1);
-        }
-        .tutor-panel {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 400px;
-            max-height: 600px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-        }
-        .tutor-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            max-height: 450px;
-        }
-        .message {
-            margin-bottom: 12px;
-            padding: 10px 14px;
-            border-radius: 8px;
-            max-width: 85%;
-        }
-        .message-user {
-            background: #667eea;
-            color: white;
-            margin-left: auto;
-        }
-        .message-tutor {
-            background: #f3f4f6;
-            color: #1f2937;
         }
         
-        /* Glossary tooltip */
-        .glossary-term {
-            cursor: help;
-            border-bottom: 2px dotted #3b82f6;
+        .tradition-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .tradition-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .tradition-card.expanded {
+            transform: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .timeline-item {
             position: relative;
         }
-        .glossary-term:hover {
-            color: #3b82f6;
+        
+        .timeline-line {
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            bottom: -20px;
+            width: 3px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+        
+        .comparison-cell {
+            min-height: 100px;
+        }
+        
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-button {
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button.active {
+            border-bottom: 3px solid #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .integration-node {
+            transition: all 0.3s ease;
+        }
+        
+        .integration-node:hover {
+            transform: scale(1.05);
+        }
+        
+        .scenario-card {
+            border-left: 4px solid #e5e7eb;
+            transition: border-color 0.3s ease;
+        }
+        
+        .scenario-card:hover {
+            border-left-color: #667eea;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
 
-        // ========== GLOSSARY DEFINITIONS ==========
-        const glossary = {
-            'I': {
-                term: 'Protocol Complexity (I)',
-                definition: 'Measures how many rules and procedures a coalition requires. Higher I means more detailed protocols, creating more friction but potentially ensuring quality. Range: 0.0 (no rules) to 1.0 (extremely detailed protocols).',
-                example: 'Ancient Athens had low I (0.12) - simple shared cultural norms. Climate negotiations have high I (0.35) - complex international treaties.'
+        // Data: Traditions
+        const TRADITIONS = {
+            aristotle: {
+                id: 'aristotle',
+                name: 'Aristotle',
+                tradition: 'Virtue Ethics',
+                period: '384-322 BCE',
+                icon: '🏛️',
+                color: 'blue',
+                tagline: 'Building Constructors',
+                traditional: {
+                    summary: 'Be virtuous by developing good character traits (courage, temperance, wisdom, justice)',
+                    keyIdeas: [
+                        'Virtue (arete) as excellence of character',
+                        'Golden mean between extremes',
+                        'Habituation through practice',
+                        'Eudaimonia as ultimate goal',
+                        'Phronesis (practical wisdom) guides action'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Aristotle was teaching constructor-level ethical design',
+                    mappings: [
+                        { concept: 'Virtue (arete)', mc: 'Reliable capability for good action that persists across contexts' },
+                        { concept: 'Character (ethos)', mc: 'Stable constructor-level patterns' },
+                        { concept: 'Habituation', mc: 'Building constructors through repeated practice until automatic' },
+                        { concept: 'Phronesis', mc: 'Meta-constructor capacity—ability to examine, deliberate, and choose well' },
+                        { concept: 'Eudaimonia', mc: 'Life with sufficient meta-constructor capacity to pursue meaningful goals' }
+                    ],
+                    strengths: [
+                        'Focuses on building persistent patterns (constructors), not just rules',
+                        'Recognizes ethical behavior requires developed capabilities',
+                        'Emphasizes practice and habituation',
+                        'Makes phronesis (meta-constructor capacity) central'
+                    ],
+                    limitations: [
+                        'Assumes relatively stable social context',
+                        'Requires time and resources for character development',
+                        'Can become rigid if virtues aren\'t revisable'
+                    ],
+                    modernInsight: 'Aristotle was right that ethics requires building stable patterns, but didn\'t fully understand how context shapes whether those patterns can form (Sapolsky), how biologically plastic we are (Levin), or that virtues themselves might need revision (Graeber & Wengrow).'
+                },
+                contexts: {
+                    worksWell: [
+                        'Stable contexts with time and resources',
+                        'When you can develop long-term patterns',
+                        'Professional development',
+                        'Character education'
+                    ],
+                    worksPoolyIn: [
+                        'Rapidly changing contexts',
+                        'Resource-scarce situations',
+                        'Systematically unjust contexts',
+                        'Crises requiring immediate response'
+                    ]
+                },
+                level: 'capability'
             },
-            'epsilon': {
-                term: 'Tolerance for Difference (ε)',
-                definition: 'Measures how much diversity in beliefs and approaches the coalition can accommodate. Higher ε means groups can maintain different frameworks while coordinating. Range: 0.0 (requires uniformity) to 1.0 (welcomes radical difference).',
-                example: 'Green Belt Movement had high ε (0.40) - welcomed feminists, scientists, traditional women with different motivations.'
+            confucius: {
+                id: 'confucius',
+                name: 'Confucius',
+                tradition: 'Confucian Ethics',
+                period: '551-479 BCE',
+                icon: '☯️',
+                color: 'green',
+                tagline: 'Temporal Coherence and Relational Cultivation',
+                traditional: {
+                    summary: 'Follow ritual propriety (li), cultivate humaneness (ren), maintain proper relationships',
+                    keyIdeas: [
+                        'Li (ritual propriety) structures social life',
+                        'Ren (humaneness) as fundamental virtue',
+                        'Xiao (filial piety) grounds relationships',
+                        'Junzi (exemplary person) as ideal',
+                        'Continuous self-cultivation'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Confucius was teaching temporal coherence maintenance across social scales',
+                    mappings: [
+                        { concept: 'Li (ritual)', mc: 'Social coherence patterns that coordinate action' },
+                        { concept: 'Ren (humaneness)', mc: 'Capacity for recognizing others as agents and coordinating' },
+                        { concept: 'Xiao (filial piety)', mc: 'Maintaining intergenerational temporal coherence' },
+                        { concept: 'Junzi', mc: 'Someone with highly developed meta-constructor capacity' },
+                        { concept: 'Self-cultivation', mc: 'Explicit meta-constructor practice' }
+                    ],
+                    strengths: [
+                        'Recognizes ethics is about coordination, not just individual virtue',
+                        'Emphasizes continuous self-examination and improvement',
+                        'Sees individual and social as inseparable',
+                        'Uses ritual as coherence-maintaining technology'
+                    ],
+                    limitations: [
+                        'Can become oppressive if hierarchies are rigid',
+                        'Rituals can ossify and prevent adaptation',
+                        'Can suppress individual meta-constructor capacity if obedience overemphasized'
+                    ],
+                    modernInsight: 'Confucian insights are valuable for understanding how rituals maintain temporal coherence (daily/weekly/yearly patterns), how relationships shape identity and capability, and why continuous self-cultivation is essential.'
+                },
+                contexts: {
+                    worksWell: [
+                        'Stable communities with shared traditions',
+                        'Contexts valuing long-term relationships',
+                        'Organizational culture building',
+                        'Family and intergenerational coordination'
+                    ],
+                    worksPoolyIn: [
+                        'Highly individualistic contexts',
+                        'Rapid social change',
+                        'When hierarchies become oppressive',
+                        'Cross-cultural contexts with different rituals'
+                    ]
+                },
+                level: 'constructor'
             },
-            'ATCF': {
-                term: 'Authentic Temporal Coherence of Form',
-                definition: 'Measures whether each group maintains its authentic identity over time while coordinating. When ATCF drops, groups feel they\'re compromising core values. Healthy coalitions maintain ATCF > 0.7.',
-                example: 'If Catholic and Protestant states maintain their religious identities while making peace, both have high ATCF.'
+            kant: {
+                id: 'kant',
+                name: 'Immanuel Kant',
+                tradition: 'Deontology',
+                period: '1724-1804',
+                icon: '⚖️',
+                color: 'purple',
+                tagline: 'Universal Meta-Constructor Capacity',
+                traditional: {
+                    summary: 'Act only on maxims you can will as universal laws; treat persons as ends, not merely means',
+                    keyIdeas: [
+                        'Categorical imperative as supreme principle',
+                        'Autonomy as self-legislation',
+                        'Dignity of rational beings',
+                        'Duty over inclination',
+                        'Kingdom of ends as ideal'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Kant was identifying the logical structure of meta-constructor capacity applied to ethics',
+                    mappings: [
+                        { concept: 'Autonomy', mc: 'Self-legislation = meta-constructor capacity' },
+                        { concept: 'Categorical imperative', mc: 'Test for whether maxim respects meta-constructor capacity universally' },
+                        { concept: 'Kingdom of ends', mc: 'Community of meta-constructors coordinating' },
+                        { concept: 'Dignity', mc: 'Recognition that persons have meta-constructor capacity' },
+                        { concept: 'Treating as ends', mc: 'Respecting their meta-constructor capacity' }
+                    ],
+                    strengths: [
+                        'Recognizes ethics requires capacity (reason/autonomy)',
+                        'Provides logical tests for ethical principles',
+                        'Respects persons as agents, not just patients',
+                        'Universal scope—applies to all rational beings'
+                    ],
+                    limitations: [
+                        'Assumes everyone has equal meta-constructor capacity',
+                        'Too abstract—doesn\'t give guidance for building capacity',
+                        'Doesn\'t address contexts that systematically degrade capacity',
+                        'Overly individualistic—doesn\'t recognize distributed agency'
+                    ],
+                    modernInsight: 'Kant was right that ethics requires meta-constructor capacity and that we should respect this in all persons. But he didn\'t understand how much capacity varies with context (Sapolsky), that capacity is distributed (Levin, Graeber & Wengrow), or that we have obligations to enhance capacity, not just respect it.'
+                },
+                contexts: {
+                    worksWell: [
+                        'When people have roughly equal capacity',
+                        'Clear principles can guide action',
+                        'Logical consistency matters',
+                        'Rights protection is primary concern'
+                    ],
+                    worksPoolyIn: [
+                        'Capacity dramatically unequal due to context',
+                        'Principles conflict',
+                        'Situations require flexibility',
+                        'Immediate practical action needed'
+                    ]
+                },
+                level: 'meta-constructor'
             },
-            'PRF': {
-                term: 'Personal Reasoning Framework',
-                definition: 'The combination of Beliefs, Rules, Ontology, and Authenticity criteria that shape how someone approaches moral decisions. Your PRF is your ethical "operating system".',
-                example: 'Kant\'s PRF emphasized rational principles and duty. Gilligan\'s PRF emphasized relationships and care. Both valid, different approaches.'
+            mill: {
+                id: 'mill',
+                name: 'John Stuart Mill',
+                tradition: 'Utilitarianism',
+                period: '1806-1873',
+                icon: '⚖️',
+                color: 'yellow',
+                tagline: 'Consequences and Capacity',
+                traditional: {
+                    summary: 'Maximize happiness/utility; the right act is the one with the best consequences',
+                    keyIdeas: [
+                        'Greatest happiness principle',
+                        'Utility as pleasure and absence of pain',
+                        'Higher vs. lower pleasures',
+                        'Harm principle (liberty)',
+                        'Social reform orientation'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Utilitarianism was trying to operationalize meta-constructor capacity at the social level',
+                    mappings: [
+                        { concept: 'Utility', mc: 'Not just pleasure, but capability for flourishing' },
+                        { concept: 'Higher pleasures', mc: 'Require developed meta-constructor capacity' },
+                        { concept: 'Greatest happiness', mc: 'Maximize collective meta-constructor capacity and its fruits' },
+                        { concept: 'Harm principle', mc: 'Don\'t degrade others\' capacity' },
+                        { concept: 'Social reform', mc: 'Recognizing contexts need to change, not just individuals' }
+                    ],
+                    strengths: [
+                        'Recognizes context matters (social reform necessary)',
+                        'Focuses on outcomes, not just intentions or rules',
+                        'Provides common metric for evaluation',
+                        'Emphasizes empirical investigation'
+                    ],
+                    limitations: [
+                        'Hard to calculate consequences',
+                        'Can justify degrading individual capacity for collective benefit',
+                        'Doesn\'t adequately protect individual meta-constructor capacity',
+                        'Can become technocratic'
+                    ],
+                    modernInsight: 'Utilitarians were right that we should care about outcomes and that context matters. But we need to measure meta-constructor capacity, not just happiness; we can\'t sacrifice individual capacity for aggregate calculations; and the act of calculating itself requires capacity that needs enhancing first.'
+                },
+                contexts: {
+                    worksWell: [
+                        'Policy design and evaluation',
+                        'Resource allocation decisions',
+                        'Public health interventions',
+                        'Situations requiring empirical testing'
+                    ],
+                    worksPoolyIn: [
+                        'When calculations become technocratic',
+                        'Individual rights at stake',
+                        'Uncertain or distant consequences',
+                        'Situations requiring immediate action'
+                    ]
+                },
+                level: 'capacity'
             },
-            'functional equivalence': {
-                term: 'Functional Equivalence',
-                definition: 'The key insight of complexity ethics: groups with different beliefs can coordinate by achieving compatible OUTCOMES rather than agreeing on reasons. They "plant trees" for different reasons but the trees still get planted.',
-                example: 'Scientists plant trees for ecosystem restoration, women for firewood, feminists for empowerment - same outcome, different motivations.'
+            rawls: {
+                id: 'rawls',
+                name: 'John Rawls',
+                tradition: 'Social Contract',
+                period: '1921-2002',
+                icon: '🤝',
+                color: 'red',
+                tagline: 'Capability-Based Coordination',
+                traditional: {
+                    summary: 'Justice as fairness: design institutions from behind a veil of ignorance',
+                    keyIdeas: [
+                        'Original position thought experiment',
+                        'Veil of ignorance',
+                        'Equal basic liberties principle',
+                        'Difference principle (benefit worst-off)',
+                        'Primary goods as prerequisites'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Rawls argued for protection of meta-constructor capacity as the foundation of justice',
+                    mappings: [
+                        { concept: 'Original position', mc: 'Thought experiment using meta-constructor capacity' },
+                        { concept: 'Veil of ignorance', mc: 'Forces consideration of all perspectives (requires high capacity)' },
+                        { concept: 'Equal liberties', mc: 'Protect meta-constructor capacity for all' },
+                        { concept: 'Difference principle', mc: 'Protect capacity of most vulnerable' },
+                        { concept: 'Primary goods', mc: 'Preconditions for meta-constructor capacity' }
+                    ],
+                    strengths: [
+                        'Recognizes preconditions for capacity (liberties, opportunities, resources)',
+                        'Prioritizes protection of most vulnerable',
+                        'Provides framework for institutional evaluation',
+                        'Connects to Graeber & Wengrow\'s three freedoms'
+                    ],
+                    limitations: [
+                        'Original position may be too idealized',
+                        'Difference principle can be difficult to apply',
+                        'Assumes stable background institutions',
+                        'May not adequately address power dynamics'
+                    ],
+                    modernInsight: 'Rawls was closest to the answer: Design institutions that protect and enhance meta-constructor capacity for all, especially the most vulnerable. His "primary goods" can be reinterpreted as capacity prerequisites: liberties (freedom to move/disobey/reconfigure), opportunities (access to development), resources (material basis), self-respect (recognition as agent).'
+                },
+                contexts: {
+                    worksWell: [
+                        'Institutional design and evaluation',
+                        'Policy analysis',
+                        'Thinking about distributive justice',
+                        'Protecting basic capabilities'
+                    ],
+                    worksPoolyIn: [
+                        'Non-ideal theory (existing injustice)',
+                        'Cross-cultural contexts',
+                        'Rapid change requiring flexibility',
+                        'When immediate action needed'
+                    ]
+                },
+                level: 'meta-constructor'
+            },
+            gilligan: {
+                id: 'gilligan',
+                name: 'Carol Gilligan',
+                tradition: 'Care Ethics',
+                period: '1936-present',
+                icon: '💝',
+                color: 'pink',
+                tagline: 'Relational Coherence and Context-Sensitivity',
+                traditional: {
+                    summary: 'Ethics is about relationships, care, and responsiveness, not just abstract rules',
+                    keyIdeas: [
+                        'Ethics of care vs. ethics of justice',
+                        'Relational self',
+                        'Context and particularity matter',
+                        'Emotional attunement',
+                        'Responsibility and connection'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Care ethics identified relational and context-dependent aspects of meta-constructor capacity',
+                    mappings: [
+                        { concept: 'Care', mc: 'Actively supporting others\' meta-constructor capacity' },
+                        { concept: 'Relational self', mc: 'Recognizing capacity is constituted through relationships' },
+                        { concept: 'Context-sensitivity', mc: 'Recognizing abstract rules ignore how context shapes capacity' },
+                        { concept: 'Emotional attunement', mc: 'Necessary capability for recognizing others\' needs' },
+                        { concept: 'Responsibility', mc: 'Obligation to maintain supportive relationships' }
+                    ],
+                    strengths: [
+                        'Challenges autonomous individual assumption',
+                        'Emphasizes relational maintenance requires work',
+                        'Shows context and particularity matter',
+                        'Recognizes emotional capabilities as essential'
+                    ],
+                    limitations: [
+                        'Can be used to justify unequal care burdens',
+                        'May not provide guidance for justice at scale',
+                        'Risk of romanticizing care relationships',
+                        'Needs integration with structural justice'
+                    ],
+                    modernInsight: 'Care ethicists were right that we\'re constituted by relationships (distributed agency), supporting others\' capacity is essential ethical work, context matters, and emotional capabilities are essential. This isn\'t opposed to justice—it\'s complementary. Justice protects capacity structurally; care supports it relationally.'
+                },
+                contexts: {
+                    worksWell: [
+                        'Interpersonal relationships',
+                        'Caregiving contexts (healthcare, education, parenting)',
+                        'Recognizing invisible emotional labor',
+                        'Understanding support networks'
+                    ],
+                    worksPoolyIn: [
+                        'Large-scale institutional design',
+                        'When care relationships are exploitative',
+                        'Situations requiring impersonal justice',
+                        'Resource allocation at scale'
+                    ]
+                },
+                level: 'capacity'
+            },
+            sartre: {
+                id: 'sartre',
+                name: 'Jean-Paul Sartre',
+                tradition: 'Existentialism',
+                period: '1905-1980',
+                icon: '🎭',
+                color: 'gray',
+                tagline: 'Radical Meta-Constructor Capacity',
+                traditional: {
+                    summary: 'Existence precedes essence; you must create yourself through authentic choice',
+                    keyIdeas: [
+                        'Existence precedes essence',
+                        'Radical freedom',
+                        'Authenticity vs. bad faith',
+                        'Responsibility for self-creation',
+                        'Confronting absurdity'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Existentialists explored the phenomenology of meta-constructor capacity and its challenges',
+                    mappings: [
+                        { concept: 'Existence precedes essence', mc: 'You don\'t have fixed nature; you\'re a meta-constructor' },
+                        { concept: 'Radical freedom', mc: 'Meta-constructor capacity with no predetermined constraints (overstated)' },
+                        { concept: 'Authenticity', mc: 'Using meta-constructor capacity to create coherent life' },
+                        { concept: 'Bad faith', mc: 'Denying your meta-constructor capacity' },
+                        { concept: 'Absurdity', mc: 'Recognition that you must construct meaning' }
+                    ],
+                    strengths: [
+                        'Emphasizes active use of meta-constructor capacity',
+                        'Recognizes burden/anxiety of capacity',
+                        'Challenges excuses that deny agency',
+                        'Focuses on authenticity and self-examination'
+                    ],
+                    limitations: [
+                        'Overestimates freedom (didn\'t understand biological/social constraints)',
+                        'Underestimates how context shapes capacity',
+                        'Too individualistic',
+                        'Can be paralyzing rather than empowering'
+                    ],
+                    modernInsight: 'Existentialists were right that you must actively use your meta-constructor capacity and that authenticity requires examining patterns. But they were wrong about radical freedom (you\'re highly context-dependent), constructing yourself alone (it\'s distributed and relational), and treating biology/society as excuses (they\'re real constraints).'
+                },
+                contexts: {
+                    worksWell: [
+                        'Personal identity questions',
+                        'Life transitions requiring choice',
+                        'Confronting meaninglessness',
+                        'Individual authenticity development'
+                    ],
+                    worksPoolyIn: [
+                        'Contexts of severe constraint',
+                        'When capacity is degraded by context',
+                        'Collective action and coordination',
+                        'When social support is primary need'
+                    ]
+                },
+                level: 'meta-constructor'
+            },
+            dewey: {
+                id: 'dewey',
+                name: 'John Dewey',
+                tradition: 'Pragmatism',
+                period: '1859-1952',
+                icon: '🔧',
+                color: 'orange',
+                tagline: 'Learning and Revision',
+                traditional: {
+                    summary: 'Truth is what works; test ideas by their consequences; democracy as collective inquiry',
+                    keyIdeas: [
+                        'Learning from experience',
+                        'Democratic experimentalism',
+                        'Instrumentalism (ideas as tools)',
+                        'Continuous growth',
+                        'Integration of theory and practice'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Pragmatists described meta-constructor capacity in action',
+                    mappings: [
+                        { concept: 'Learning from experience', mc: 'Core meta-constructor activity' },
+                        { concept: 'Democratic experimentalism', mc: 'Collective meta-constructor capacity' },
+                        { concept: 'Instrumentalism', mc: 'Meta-constructor stance toward ideas themselves' },
+                        { concept: 'Growth', mc: 'Continuous enhancement of capacity' },
+                        { concept: 'Reflection', mc: 'Examining patterns to improve' }
+                    ],
+                    strengths: [
+                        'Emphasizes learning and revision',
+                        'Recognizes collective inquiry',
+                        'Tests ideas by practical outcomes',
+                        'Integrates theory and practice seamlessly'
+                    ],
+                    limitations: [
+                        'May lack clear normative grounding',
+                        'Can be too relativistic',
+                        'Requires time for experimentation',
+                        'May not provide guidance in novel situations'
+                    ],
+                    modernInsight: 'Dewey\'s educational philosophy was explicitly about building meta-constructor capacity: learning by doing, reflection on experience, democratic participation, and continuous growth. This IS the approach we\'re taking: ethics isn\'t fixed truths to memorize but capabilities to develop through practice, tested by whether they enhance capacity and coordination.'
+                },
+                contexts: {
+                    worksWell: [
+                        'Educational contexts',
+                        'Organizational learning',
+                        'Democratic participation',
+                        'Continuous improvement processes'
+                    ],
+                    worksPoolyIn: [
+                        'When immediate principles needed',
+                        'Contexts requiring stability',
+                        'When experimentation is risky',
+                        'Situations demanding quick decisions'
+                    ]
+                },
+                level: 'meta-constructor'
+            },
+            buddha: {
+                id: 'buddha',
+                name: 'Buddha',
+                tradition: 'Buddhism',
+                period: 'c. 563-483 BCE',
+                icon: '🧘',
+                color: 'indigo',
+                tagline: 'Examining and Modifying Mental Patterns',
+                traditional: {
+                    summary: 'Suffering comes from attachment; achieve liberation through meditation and ethical conduct',
+                    keyIdeas: [
+                        'Four Noble Truths',
+                        'Noble Eightfold Path',
+                        'Mindfulness and meditation',
+                        'Non-attachment',
+                        'Liberation from suffering'
+                    ]
+                },
+                metaConstructor: {
+                    summary: 'Buddhism is systematic training in meta-constructor capacity applied to mental states',
+                    mappings: [
+                        { concept: 'Mindfulness', mc: 'Awareness of your own processes (meta-level observation)' },
+                        { concept: 'Meditation', mc: 'Practice examining and not identifying with mental patterns' },
+                        { concept: 'Non-attachment', mc: 'Not letting patterns rigidify (flexibility for revision)' },
+                        { concept: 'Noble Eightfold Path', mc: 'Integrated development of constructor-level ethical patterns' },
+                        { concept: 'Liberation', mc: 'Maximal meta-constructor capacity (able to examine any pattern)' }
+                    ],
+                    strengths: [
+                        'Recognizes experienced self is constructed',
+                        'Provides practical methods for examining patterns',
+                        'Emphasizes developing capacity, not just beliefs',
+                        'Integrates ethical behavior, mental training, wisdom'
+                    ],
+                    limitations: [
+                        'Can underemphasize structural/social factors',
+                        'May be interpreted as quietistic',
+                        'Requires significant time investment',
+                        'Cultural translation challenges'
+                    ],
+                    modernInsight: 'Buddhist practices are valuable for developing meta-cognitive skills, emotional regulation (protecting capacity), reducing stress (protecting biological substrates), and examining automatic patterns. Modern neuroscience confirms meditation changes brain structure, enhances prefrontal cortex, and regulates amygdala.'
+                },
+                contexts: {
+                    worksWell: [
+                        'Personal mental training',
+                        'Stress reduction',
+                        'Developing metacognitive skills',
+                        'Emotional regulation'
+                    ],
+                    worksPoolyIn: [
+                        'Situations requiring collective action',
+                        'When structural change is primary need',
+                        'Immediate crises',
+                        'Contexts where withdrawal isn\'t possible'
+                    ]
+                },
+                level: 'meta-constructor'
             }
         };
 
-        // ========== ENHANCED SCENARIO WITH DIFFERENTIATED AGENTS ==========
-        const enhancedGreenBeltScenario = {
-            id: 'green-belt-enhanced',
-            title: 'Green Belt Movement (Enhanced)',
-            period: '1977-2006',
-            week: 3,
-            framework: 'Complexity Ethics in Action',
-            description: 'Real coordination across radical difference. Each group has DIFFERENT frameworks and motivations, yet achieves shared outcome through functional equivalence.',
-            learningGoal: 'See how minimal protocol + high tolerance enables groups with incompatible beliefs to coordinate effectively',
-            task: { description: 'Plant 51 million trees across Kenya', successCriteria: 'All groups maintain authenticity while achieving shared outcome' },
-            defaultI: 0.01,
-            defaultEpsilon: 0.40,
-            agents: [
-                {
-                    name: 'Traditional Women',
-                    framework: 'Care Ethics',
-                    initialATCF: 0.85,
-                    motivation: 'Survival and family care',
-                    reasoning: 'Trees provide firewood and prevent soil erosion that threatens our farms',
-                    decisionStyle: 'Context-dependent, relationship-focused',
-                    capabilities: [{name: 'Tree planting', level: 0.9}, {name: 'Local knowledge', level: 0.95}],
-                    beliefs: [{text: 'Care for family and community', strength: 95}],
-                    color: '#10b981'
-                },
-                {
-                    name: 'Environmental Scientists',
-                    framework: 'Consequentialism',
-                    initialATCF: 0.80,
-                    motivation: 'Ecosystem restoration',
-                    reasoning: 'Deforestation causes measurable harm; reforestation produces measurable benefits',
-                    decisionStyle: 'Evidence-based, outcome-focused',
-                    capabilities: [{name: 'Ecology expertise', level: 0.95}, {name: 'Research', level: 0.9}],
-                    beliefs: [{text: 'Maximize ecosystem health', strength: 90}],
-                    color: '#3b82f6'
-                },
-                {
-                    name: 'Feminist Activists',
-                    framework: 'Deontology (Rights-based)',
-                    initialATCF: 0.85,
-                    motivation: 'Women\'s empowerment and rights',
-                    reasoning: 'Women have right to economic independence; tree planting provides income',
-                    decisionStyle: 'Principle-driven, justice-focused',
-                    capabilities: [{name: 'Political organizing', level: 0.85}, {name: 'Advocacy', level: 0.9}],
-                    beliefs: [{text: 'Women\'s dignity and rights', strength: 90}],
-                    color: '#8b5cf6'
-                },
-                {
-                    name: 'Religious Leaders',
-                    framework: 'Virtue Ethics',
-                    initialATCF: 0.80,
-                    motivation: 'Stewardship duty',
-                    reasoning: 'God entrusted creation to our care; we must be good stewards',
-                    decisionStyle: 'Character-based, traditional wisdom',
-                    capabilities: [{name: 'Community influence', level: 0.85}, {name: 'Moral guidance', level: 0.8}],
-                    beliefs: [{text: 'Fulfill stewardship role', strength: 85}],
-                    color: '#f59e0b'
-                }
-            ],
-            pedagogicalNotes: [
-                'Notice: Each group has DIFFERENT framework, motivation, and reasoning style',
-                'The protocol is minimal (I=0.01): "Plant indigenous trees"',
-                'High tolerance (ε=0.40) allows each group to maintain authentic identity',
-                'Success comes from FUNCTIONAL EQUIVALENCE not belief agreement',
-                'Compare this to scenarios where everyone shares the same framework'
-            ]
-        };
-
-        // ========== AI TUTOR COMPONENT ==========
-        function AITutor({ currentPage, scenario }) {
-            const [isOpen, setIsOpen] = useState(false);
-            const [messages, setMessages] = useState([
-                {
-                    role: 'tutor',
-                    content: 'Hi! I\'m your Ethics Lab tutor. Ask me anything about the scenarios, frameworks, or concepts. I have access to all course content!'
-                }
-            ]);
-            const [input, setInput] = useState('');
-            const [isLoading, setIsLoading] = useState(false);
-            const messagesEndRef = useRef(null);
-
-            const scrollToBottom = () => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            };
-
-            useEffect(() => {
-                scrollToBottom();
-            }, [messages]);
-
-            const handleSend = async () => {
-                if (!input.trim() || isLoading) return;
-
-                const userMessage = input.trim();
-                setInput('');
-                setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-                setIsLoading(true);
-
-                try {
-                    // Build context for the AI
-                    let context = `You are an expert tutor for the Ethics Assembly History Lab course. 
-                    
-Current page: ${currentPage}
-${scenario ? `Current scenario: ${scenario.title} - ${scenario.description}` : ''}
-
-Course concepts you can explain:
-- Protocol Complexity (I): ${glossary.I.definition}
-- Tolerance (ε): ${glossary.epsilon.definition}
-- ATCF: ${glossary.ATCF.definition}
-- PRF: ${glossary.PRF.definition}
-- Functional Equivalence: ${glossary['functional equivalence'].definition}
-
-The course teaches that traditional ethics assumes we must AGREE on values to coordinate. Complexity ethics shows we can coordinate through FUNCTIONAL EQUIVALENCE - achieving compatible outcomes despite different motivations.
-
-Student question: ${userMessage}
-
-Provide a clear, helpful response in 2-3 paragraphs. Use examples from the scenarios when relevant. Be encouraging and pedagogical.`;
-
-                    const response = await fetch("https://api.anthropic.com/v1/messages", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            model: "claude-sonnet-4-20250514",
-                            max_tokens: 500,
-                            messages: [
-                                { role: "user", content: context }
-                            ]
-                        })
-                    });
-
-                    const data = await response.json();
-                    const tutorResponse = data.content[0].text;
-
-                    setMessages(prev => [...prev, { role: 'tutor', content: tutorResponse }]);
-                } catch (error) {
-                    console.error('Tutor error:', error);
-                    setMessages(prev => [...prev, { 
-                        role: 'tutor', 
-                        content: 'Sorry, I encountered an error. Please try again or ask a different question!' 
-                    }]);
-                }
-
-                setIsLoading(false);
-            };
-
-            return (
-                <>
-                    <button 
-                        className="tutor-button"
-                        onClick={() => setIsOpen(!isOpen)}
-                        title="Ask the AI Tutor">
-                        🤖
-                    </button>
-
-                    {isOpen && (
-                        <div className="tutor-panel">
-                            <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-t-xl">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-bold text-lg">AI Ethics Tutor</h3>
-                                    <button onClick={() => setIsOpen(false)} className="text-white text-xl">×</button>
-                                </div>
-                                <p className="text-xs mt-1 text-purple-100">Ask about scenarios, concepts, or frameworks</p>
-                            </div>
-
-                            <div className="tutor-messages">
-                                {messages.map((msg, idx) => (
-                                    <div key={idx} className={`message ${msg.role === 'user' ? 'message-user' : 'message-tutor'}`}>
-                                        <div className="text-xs font-semibold mb-1 opacity-70">
-                                            {msg.role === 'user' ? 'You' : '🤖 Tutor'}
-                                        </div>
-                                        <div className="text-sm">{msg.content}</div>
-                                    </div>
-                                ))}
-                                {isLoading && (
-                                    <div className="message message-tutor">
-                                        <div className="text-sm">Thinking...</div>
-                                    </div>
-                                )}
-                                <div ref={messagesEndRef} />
-                            </div>
-
-                            <div className="p-3 border-t">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                        placeholder="Ask a question..."
-                                        className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        onClick={handleSend}
-                                        disabled={isLoading || !input.trim()}
-                                        className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed">
-                                        Send
-                                    </button>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-500">
-                                    Try: "Explain functional equivalence" or "Why does high I create friction?"
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </>
-            );
-        }
-
-        // ========== GLOSSARY TOOLTIP COMPONENT ==========
-        function GlossaryTerm({ term, children }) {
-            const [showTooltip, setShowTooltip] = useState(false);
-            const entry = glossary[term];
-
-            if (!entry) return <span>{children}</span>;
-
-            return (
-                <span 
-                    className="glossary-term inline-block relative"
-                    onMouseEnter={() => setShowTooltip(true)}
-                    onMouseLeave={() => setShowTooltip(false)}>
-                    {children}
-                    {showTooltip && (
-                        <div className="absolute z-50 w-80 p-4 bg-white border-2 border-blue-500 rounded-lg shadow-xl bottom-full left-0 mb-2">
-                            <h4 className="font-bold text-blue-600 mb-2">{entry.term}</h4>
-                            <p className="text-sm text-gray-700 mb-2">{entry.definition}</p>
-                            <p className="text-xs text-gray-600 italic"><strong>Example:</strong> {entry.example}</p>
-                        </div>
-                    )}
-                </span>
-            );
-        }
-
-        // ========== ENHANCED SIMULATION (Framework-Aware) ==========
-        function runEnhancedSimulation(scenario, I, epsilon, numRuns = 20, numSteps = 10) {
-            const results = {
-                runs: [],
-                summary: { avgSuccessRate: 0, avgFinalATCF: 0, robustness: 0 },
-                timeSeriesData: Array.from({length: numSteps}, (_, i) => ({ 
-                    time: i + 1, avgSuccess: 0, avgATCF: 0, runs: [], agentData: {}
-                })),
-                agentTimeSeries: scenario.agents.map(agent => ({
-                    name: agent.name,
-                    framework: agent.framework,
-                    color: agent.color || '#3b82f6',
-                    atcfOverTime: []
-                }))
-            };
-
-            let totalSuccesses = 0, totalFinalATCF = 0;
-
-            for (let run = 0; run < numRuns; run++) {
-                const runData = { runNumber: run + 1, steps: [] };
-                
-                for (let step = 0; step < numSteps; step++) {
-                    // Calculate framework compatibility
-                    const frameworkDiversity = new Set(scenario.agents.map(a => a.framework)).size;
-                    const diversityFactor = frameworkDiversity / scenario.agents.length;
-
-                    // Base success probability
-                    let successProb = 0.5 - (I * 0.15) + (epsilon * 0.3);
-                    
-                    // High diversity requires high epsilon
-                    if (diversityFactor > 0.5 && epsilon < 0.3) {
-                        successProb -= 0.2; // Penalty for diverse group with low tolerance
-                    }
-                    
-                    // Functional equivalence bonus (low I + high epsilon with diversity)
-                    if (I < 0.1 && epsilon > 0.35 && diversityFactor > 0.5) {
-                        successProb += 0.15; // Complexity ethics working!
-                    }
-
-                    const success = Math.random() < Math.max(0.05, Math.min(0.95, successProb));
-
-                    // Calculate ATCF per agent (framework-specific)
-                    const agentATCFs = scenario.agents.map(agent => {
-                        let atcf = agent.initialATCF || 0.8;
-                        
-                        // Framework-specific ATCF calculation
-                        if (agent.framework === 'Care Ethics' && I > 0.3) {
-                            atcf -= 0.15; // Care ethics suffers under rigid protocols
-                        }
-                        if (agent.framework === 'Deontology' && I < 0.15) {
-                            atcf -= 0.1; // Deontology wants some structure
-                        }
-                        if (agent.framework === 'Consequentialism' && !success) {
-                            atcf -= 0.05; // Consequentialists care about outcomes
-                        }
-                        
-                        // Universal factors
-                        atcf -= I * 0.1;
-                        atcf += epsilon * 0.15;
-                        atcf -= step * 0.015;
-                        
-                        return Math.max(0.1, Math.min(1.0, atcf));
-                    });
-
-                    const avgATCF = agentATCFs.reduce((sum, a) => sum + a, 0) / agentATCFs.length;
-
-                    runData.steps.push({ step: step + 1, success, avgATCF, agentATCFs });
-                    results.timeSeriesData[step].runs.push({ success: success ? 1 : 0, atcf: avgATCF });
-                    
-                    // Store per-agent ATCF
-                    agentATCFs.forEach((atcf, idx) => {
-                        if (!results.timeSeriesData[step].agentData[scenario.agents[idx].name]) {
-                            results.timeSeriesData[step].agentData[scenario.agents[idx].name] = [];
-                        }
-                        results.timeSeriesData[step].agentData[scenario.agents[idx].name].push(atcf);
-                    });
-                }
-
-                const finalStep = runData.steps[numSteps - 1];
-                totalSuccesses += finalStep.success ? 1 : 0;
-                totalFinalATCF += finalStep.avgATCF;
-                results.runs.push(runData);
-            }
-
-            // Calculate averages
-            results.timeSeriesData.forEach(tp => {
-                tp.avgSuccess = tp.runs.reduce((s, r) => s + r.success, 0) / tp.runs.length * 100;
-                tp.avgATCF = tp.runs.reduce((s, r) => s + r.atcf, 0) / tp.runs.length * 100;
-                
-                // Average ATCF per agent
-                Object.keys(tp.agentData).forEach(agentName => {
-                    const values = tp.agentData[agentName];
-                    tp.agentData[agentName] = values.reduce((s, v) => s + v, 0) / values.length * 100;
-                });
-            });
-
-            // Build agent time series
-            results.agentTimeSeries.forEach((agentSeries, idx) => {
-                agentSeries.atcfOverTime = results.timeSeriesData.map(tp => ({
-                    time: tp.time,
-                    atcf: tp.agentData[scenario.agents[idx].name] || 0
-                }));
-            });
-
-            results.summary.avgSuccessRate = (totalSuccesses / numRuns) * 100;
-            results.summary.avgFinalATCF = totalFinalATCF / numRuns;
-            
-            const successRates = results.runs.map(r => r.steps[numSteps-1].success ? 100 : 0);
-            const variance = successRates.reduce((sum, sr) => 
-                sum + Math.pow(sr - results.summary.avgSuccessRate, 2), 0
-            ) / numRuns;
-            results.summary.robustness = Math.max(0, 100 - Math.sqrt(variance));
-
-            return results;
-        }
-
-        // ========== ENHANCED CHART WITH PER-AGENT ATCF ==========
-        function EnhancedChart({ data, agentTimeSeries, title }) {
-            const maxValue = 100;
-            
-            return (
-                <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">{title}</h4>
-                    
-                    {/* Success Rate Chart */}
-                    <div className="chart-container bg-gray-50 mb-6">
-                        <p className="text-sm font-semibold text-gray-600 mb-2">Success Rate Over Time</p>
-                        <div className="flex justify-between h-full items-end px-2">
-                            {data.map((d, i) => (
-                                <div key={i} className="flex-1 flex flex-col items-center justify-end" style={{height: '90%'}}>
-                                    <div 
-                                        className="chart-bar w-full"
-                                        style={{
-                                            height: `${d.avgSuccess}%`,
-                                            background: 'linear-gradient(to top, #3b82f6, #60a5fa)',
-                                            maxWidth: '20px'
-                                        }}
-                                        title={`Success: ${d.avgSuccess.toFixed(1)}%`}>
-                                    </div>
-                                    <span className="text-xs text-gray-500 mt-2">{d.time}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* ATCF by Agent Chart */}
-                    {agentTimeSeries && agentTimeSeries.length > 0 && (
-                        <div className="chart-container bg-gray-50">
-                            <p className="text-sm font-semibold text-gray-600 mb-2">ATCF by Stakeholder Group</p>
-                            <div className="flex justify-between h-full items-end px-2">
-                                {data.map((d, timeIdx) => (
-                                    <div key={timeIdx} className="flex-1 flex flex-col items-center justify-end" style={{height: '90%'}}>
-                                        <div className="flex gap-0.5 items-end h-full">
-                                            {agentTimeSeries.map((agent, agentIdx) => (
-                                                <div
-                                                    key={agentIdx}
-                                                    className="chart-bar"
-                                                    style={{
-                                                        height: `${agent.atcfOverTime[timeIdx].atcf}%`,
-                                                        width: `${100 / agentTimeSeries.length / data.length}px`,
-                                                        background: agent.color
-                                                    }}
-                                                    title={`${agent.name}: ${agent.atcfOverTime[timeIdx].atcf.toFixed(1)}%`}>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <span className="text-xs text-gray-500 mt-2">{d.time}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Legend */}
-                    <div className="mt-6 space-y-3">
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            {agentTimeSeries && agentTimeSeries.map((agent, idx) => (
-                                <div key={idx} className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded" style={{background: agent.color}}></div>
-                                    <span className="text-sm">{agent.name}</span>
-                                    <span className="text-xs text-gray-500">({agent.framework})</span>
-                                </div>
-                            ))}
-                        </div>
-                        <p className="text-xs text-center text-gray-600 italic">
-                            Notice how different frameworks maintain ATCF differently based on I and ε values
-                        </p>
-                    </div>
-                </div>
-            );
-        }
-
-        // ========== MINIMAL MAIN APP (showing key enhancements) ==========
+        // Main App Component
         function App() {
-            const [page, setPage] = useState('home');
-            const [scenario, setScenario] = useState(null);
-            const [I, setI] = useState(0.2);
-            const [epsilon, setEpsilon] = useState(0.3);
-            const [results, setResults] = useState(null);
-            const [isRunning, setIsRunning] = useState(false);
-            const [showGlossary, setShowGlossary] = useState(false);
+            const [currentView, setCurrentView] = useState('overview');
+            const [selectedTradition, setSelectedTradition] = useState(null);
+            const [compareSet, setCompareSet] = useState([]);
+            const [contextScenario, setContextScenario] = useState(null);
+            const [completedSections, setCompletedSections] = useState(new Set());
 
-            const handleNavigate = (newPage) => {
-                setPage(newPage);
-                window.scrollTo(0, 0);
+            // Load saved progress
+            useEffect(() => {
+                const saved = localStorage.getItem('traditionsExplorerProgress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    setCompletedSections(new Set(data.completed));
+                }
+            }, []);
+
+            // Save progress
+            useEffect(() => {
+                localStorage.setItem('traditionsExplorerProgress', JSON.stringify({
+                    completed: Array.from(completedSections)
+                }));
+            }, [completedSections]);
+
+            const markComplete = (section) => {
+                setCompletedSections(prev => new Set([...prev, section]));
             };
 
-            const handleSelectScenario = (s) => {
-                setScenario(s);
-                setI(s.defaultI);
-                setEpsilon(s.defaultEpsilon);
-                setResults(null);
-                handleNavigate('simulator');
-            };
-
-            const handleRunSimulation = () => {
-                if (!scenario) return;
-                setIsRunning(true);
-                setTimeout(() => {
-                    const modScenario = { ...scenario, defaultI: I, defaultEpsilon: epsilon };
-                    const ensembleResults = runEnhancedSimulation(modScenario, I, epsilon);
-                    setResults(ensembleResults);
-                    setIsRunning(false);
-                }, 500);
-            };
+            const views = [
+                { id: 'overview', label: 'Overview', icon: '🏠' },
+                { id: 'explorer', label: 'Tradition Explorer', icon: '🔍' },
+                { id: 'timeline', label: 'Historical Timeline', icon: '📅' },
+                { id: 'comparison', label: 'Compare Traditions', icon: '⚖️' },
+                { id: 'context', label: 'Context Diagnostic', icon: '🎯' },
+                { id: 'integration', label: 'Integration Map', icon: '🧩' },
+                { id: 'practice', label: 'Practice Scenarios', icon: '💡' }
+            ];
 
             return (
-                <div className="min-h-screen bg-gray-100">
-                    {/* AI Tutor (always available) */}
-                    <AITutor currentPage={page} scenario={scenario} />
+                <div className="min-h-screen">
+                    {/* Header */}
+                    <header className="gradient-bg text-white shadow-lg">
+                        <div className="max-w-7xl mx-auto px-4 py-6">
+                            <h1 className="text-3xl font-bold mb-2">Historical Traditions Explorer</h1>
+                            <p className="text-lg opacity-90">Understanding Ethics Through the Meta-Constructor Lens</p>
+                        </div>
+                    </header>
 
                     {/* Navigation */}
-                    <nav className="bg-white shadow-md sticky top-0 z-40">
+                    <nav className="bg-white shadow-sm sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4">
-                            <div className="flex justify-between items-center h-16">
-                                <button onClick={() => handleNavigate('home')} 
-                                        className="text-xl font-bold text-gray-800 hover:text-blue-600">
-                                    Ethics Lab
-                                </button>
-                                <div className="flex gap-2">
-                                    <button onClick={() => setShowGlossary(!showGlossary)}
-                                            className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
-                                        📖 Glossary
+                            <div className="flex overflow-x-auto py-4 space-x-2">
+                                {views.map(view => (
+                                    <button
+                                        key={view.id}
+                                        onClick={() => setCurrentView(view.id)}
+                                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all tab-button ${
+                                            currentView === view.id ? 'active' : 'hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <span className="text-xl">{view.icon}</span>
+                                        <span>{view.label}</span>
+                                        {completedSections.has(view.id) && (
+                                            <span className="text-green-500">✓</span>
+                                        )}
                                     </button>
-                                    <button onClick={() => handleNavigate('enhanced-demo')}
-                                            className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700">
-                                        🆕 Enhanced Demo
-                                    </button>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     </nav>
 
-                    {/* Glossary Panel */}
-                    {showGlossary && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setShowGlossary(false)}>
-                            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-xl">
-                                    <div className="flex justify-between items-center">
-                                        <h2 className="text-2xl font-bold">📖 Ethics Lab Glossary</h2>
-                                        <button onClick={() => setShowGlossary(false)} className="text-2xl">×</button>
-                                    </div>
-                                </div>
-                                <div className="p-6 space-y-6">
-                                    {Object.entries(glossary).map(([key, entry]) => (
-                                        <div key={key} className="border-l-4 border-blue-500 pl-4">
-                                            <h3 className="text-lg font-bold text-gray-800 mb-2">{entry.term}</h3>
-                                            <p className="text-gray-700 mb-2">{entry.definition}</p>
-                                            <div className="bg-blue-50 p-3 rounded">
-                                                <p className="text-sm text-gray-700">
-                                                    <strong className="text-blue-700">Example:</strong> {entry.example}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Main Content */}
+                    {/* Content */}
                     <main className="max-w-7xl mx-auto px-4 py-8">
-                        {/* HOME */}
-                        {page === 'home' && (
-                            <div className="max-w-4xl mx-auto">
-                                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8 mb-8">
-                                    <h1 className="text-4xl font-bold mb-4">Ethics Lab - Enhanced Edition</h1>
-                                    <p className="text-xl">Now with AI Tutor, Glossary, and Framework-Aware Simulations!</p>
-                                </div>
-
-                                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                                    <div className="bg-white rounded-lg shadow-md p-6">
-                                        <h2 className="text-2xl font-semibold mb-3 text-gray-800">🆕 New Features</h2>
-                                        <ul className="space-y-2 text-sm">
-                                            <li className="flex items-start">
-                                                <span className="text-purple-500 mr-2">🤖</span>
-                                                <span><strong>AI Tutor:</strong> Ask questions anytime (bottom right button)</span>
-                                            </li>
-                                            <li className="flex items-start">
-                                                <span className="text-blue-500 mr-2">📖</span>
-                                                <span><strong>Glossary:</strong> Hover over underlined terms or click Glossary button</span>
-                                            </li>
-                                            <li className="flex items-start">
-                                                <span className="text-green-500 mr-2">📊</span>
-                                                <span><strong>Framework-Aware Simulations:</strong> See how different frameworks interact</span>
-                                            </li>
-                                            <li className="flex items-start">
-                                                <span className="text-orange-500 mr-2">👥</span>
-                                                <span><strong>Agent Differentiation:</strong> Each group maintains distinct identity</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-
-                                    <div className="bg-white rounded-lg shadow-md p-6">
-                                        <h2 className="text-2xl font-semibold mb-3 text-gray-800">💡 Key Concepts</h2>
-                                        <div className="space-y-2 text-sm">
-                                            <p>
-                                                <GlossaryTerm term="I">Protocol Complexity (I)</GlossaryTerm>: Rules create friction
-                                            </p>
-                                            <p>
-                                                <GlossaryTerm term="epsilon">Tolerance (ε)</GlossaryTerm>: Welcoming difference
-                                            </p>
-                                            <p>
-                                                <GlossaryTerm term="ATCF">ATCF</GlossaryTerm>: Maintaining authentic identity
-                                            </p>
-                                            <p>
-                                                <GlossaryTerm term="functional equivalence">Functional Equivalence</GlossaryTerm>: The key insight
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
-                                    <h2 className="text-2xl font-semibold mb-3 text-gray-800">🎯 Try the Enhanced Demo</h2>
-                                    <p className="text-gray-700 mb-4">
-                                        See the Green Belt Movement with REAL differentiated agents - each with different frameworks, 
-                                        motivations, and reasoning styles. Watch how they maintain authentic identities while coordinating!
-                                    </p>
-                                    <button onClick={() => handleSelectScenario(enhancedGreenBeltScenario)}
-                                            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 font-semibold">
-                                        Run Enhanced Scenario
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ENHANCED DEMO PAGE */}
-                        {page === 'enhanced-demo' && (
-                            <div>
-                                <h1 className="text-3xl font-bold text-gray-800 mb-2">Enhanced Green Belt Movement</h1>
-                                <p className="text-gray-600 mb-6">See how DIFFERENT frameworks coordinate through functional equivalence</p>
-
-                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                                    <h3 className="font-semibold text-yellow-800 mb-2">📚 Pedagogical Notes:</h3>
-                                    <ul className="text-sm text-yellow-700 space-y-1">
-                                        {enhancedGreenBeltScenario.pedagogicalNotes.map((note, idx) => (
-                                            <li key={idx}>• {note}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div className="grid md:grid-cols-4 gap-4 mb-6">
-                                    {enhancedGreenBeltScenario.agents.map((agent, idx) => (
-                                        <div key={idx} className="bg-white rounded-lg shadow-md p-4 border-l-4" style={{borderColor: agent.color}}>
-                                            <h3 className="font-bold text-gray-800 mb-2">{agent.name}</h3>
-                                            <div className="space-y-2 text-sm">
-                                                <p>
-                                                    <span className="font-semibold text-gray-700">Framework:</span>
-                                                    <br/><span className="text-gray-600">{agent.framework}</span>
-                                                </p>
-                                                <p>
-                                                    <span className="font-semibold text-gray-700">Motivation:</span>
-                                                    <br/><span className="text-gray-600">{agent.motivation}</span>
-                                                </p>
-                                                <p>
-                                                    <span className="font-semibold text-gray-700">Reasoning:</span>
-                                                    <br/><span className="text-gray-600 italic text-xs">{agent.reasoning}</span>
-                                                </p>
-                                                <p>
-                                                    <span className="font-semibold text-gray-700">Decision Style:</span>
-                                                    <br/><span className="text-gray-600 text-xs">{agent.decisionStyle}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <button onClick={() => handleSelectScenario(enhancedGreenBeltScenario)}
-                                        className="w-full bg-purple-600 text-white py-4 rounded-lg hover:bg-purple-700 font-bold text-lg mb-6">
-                                    Run Enhanced Simulation →
-                                </button>
-
-                                <div className="bg-blue-50 rounded-lg p-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">🔍 What to Watch For:</h3>
-                                    <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                        <div>
-                                            <p className="font-semibold text-blue-800 mb-2">Try LOW I (0.01) + HIGH ε (0.40):</p>
-                                            <ul className="text-gray-700 space-y-1">
-                                                <li>• All groups maintain high ATCF</li>
-                                                <li>• Success rate is high</li>
-                                                <li>• Different colors stay strong</li>
-                                                <li>• This is functional equivalence!</li>
-                                            </ul>
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-red-800 mb-2">Try HIGH I (0.4) + LOW ε (0.15):</p>
-                                            <ul className="text-gray-700 space-y-1">
-                                                <li>• ATCF drops (especially Care Ethics)</li>
-                                                <li>• Success rate declines</li>
-                                                <li>• Groups feel compromised</li>
-                                                <li>• Diversity becomes friction</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* SIMULATOR PAGE */}
-                        {page === 'simulator' && (
-                            <div>
-                                {!scenario ? (
-                                    <div className="max-w-4xl mx-auto text-center py-12">
-                                        <div className="text-6xl mb-4">🎭</div>
-                                        <h2 className="text-2xl font-bold text-gray-800 mb-4">No Scenario Selected</h2>
-                                        <button onClick={() => handleNavigate('enhanced-demo')} 
-                                                className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
-                                            Try Enhanced Scenario
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <button onClick={() => handleNavigate('enhanced-demo')} 
-                                                className="text-blue-600 hover:text-blue-800 mb-4">
-                                            ← Back
-                                        </button>
-                                        <h1 className="text-3xl font-bold text-gray-800 mb-2">{scenario.title}</h1>
-                                        <p className="text-gray-600 mb-6">{scenario.period}</p>
-                                        
-                                        <div className="grid lg:grid-cols-3 gap-6">
-                                            <div className="bg-white rounded-lg shadow-md p-6">
-                                                <h2 className="text-xl font-semibold text-gray-800 mb-4">Controls</h2>
-                                                <div className="mb-4 p-3 bg-blue-50 rounded">
-                                                    <p className="text-sm font-semibold text-blue-800 mb-1">Task:</p>
-                                                    <p className="text-sm text-gray-700">{scenario.task.description}</p>
-                                                </div>
-                                                <div className="space-y-6">
-                                                    <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                            <GlossaryTerm term="I">Protocol Complexity (I)</GlossaryTerm>: {I.toFixed(2)}
-                                                        </label>
-                                                        <input type="range" min="0" max="1" step="0.05" value={I}
-                                                               onChange={(e) => setI(parseFloat(e.target.value))}
-                                                               className="w-full" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                            <GlossaryTerm term="epsilon">Tolerance (ε)</GlossaryTerm>: {epsilon.toFixed(2)}
-                                                        </label>
-                                                        <input type="range" min="0" max="1" step="0.05" value={epsilon}
-                                                               onChange={(e) => setEpsilon(parseFloat(e.target.value))}
-                                                               className="w-full" />
-                                                    </div>
-                                                    <button onClick={handleRunSimulation} disabled={isRunning}
-                                                            className={`w-full py-3 rounded-lg font-semibold ${
-                                                                isRunning 
-                                                                ? 'bg-gray-400 cursor-not-allowed' 
-                                                                : 'bg-blue-600 hover:bg-blue-700'
-                                                            } text-white`}>
-                                                        {isRunning ? 'Running...' : 'Run Simulation'}
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="lg:col-span-2">
-                                                {!results ? (
-                                                    <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                                                        <div className="text-6xl mb-4">⚙️</div>
-                                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Ready to Simulate</h3>
-                                                        <p className="text-gray-600">Adjust parameters and run</p>
-                                                    </div>
-                                                ) : (
-                                                    <div className="space-y-6">
-                                                        <div className="bg-white rounded-lg shadow-md p-6">
-                                                            <h3 className="text-xl font-semibold text-gray-800 mb-4">Summary Statistics</h3>
-                                                            <div className="grid grid-cols-3 gap-4">
-                                                                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                                                                    <p className="text-3xl font-bold text-blue-600">
-                                                                        {results.summary.avgSuccessRate.toFixed(0)}%
-                                                                    </p>
-                                                                    <p className="text-sm text-gray-600 mt-1">Success</p>
-                                                                </div>
-                                                                <div className="text-center p-4 bg-green-50 rounded-lg">
-                                                                    <p className="text-3xl font-bold text-green-600">
-                                                                        {(results.summary.avgFinalATCF * 100).toFixed(0)}%
-                                                                    </p>
-                                                                    <p className="text-sm text-gray-600 mt-1">ATCF</p>
-                                                                </div>
-                                                                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                                                                    <p className="text-3xl font-bold text-purple-600">
-                                                                        {results.summary.robustness.toFixed(0)}%
-                                                                    </p>
-                                                                    <p className="text-sm text-gray-600 mt-1">Robust</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="bg-white rounded-lg shadow-md p-6">
-                                                            <EnhancedChart 
-                                                                data={results.timeSeriesData} 
-                                                                agentTimeSeries={results.agentTimeSeries}
-                                                                title="Performance Over Time" 
-                                                            />
-                                                        </div>
-
-                                                        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6">
-                                                            <h3 className="text-lg font-semibold text-gray-800 mb-2">🎯 Learning Goal</h3>
-                                                            <p className="text-gray-700">{scenario.learningGoal}</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                        <div className="fade-in">
+                            {currentView === 'overview' && (
+                                <OverviewSection onComplete={() => markComplete('overview')} />
+                            )}
+                            {currentView === 'explorer' && (
+                                <ExplorerSection 
+                                    traditions={TRADITIONS}
+                                    selectedTradition={selectedTradition}
+                                    setSelectedTradition={setSelectedTradition}
+                                    onComplete={() => markComplete('explorer')}
+                                />
+                            )}
+                            {currentView === 'timeline' && (
+                                <TimelineSection 
+                                    traditions={TRADITIONS}
+                                    onComplete={() => markComplete('timeline')}
+                                />
+                            )}
+                            {currentView === 'comparison' && (
+                                <ComparisonSection 
+                                    traditions={TRADITIONS}
+                                    compareSet={compareSet}
+                                    setCompareSet={setCompareSet}
+                                    onComplete={() => markComplete('comparison')}
+                                />
+                            )}
+                            {currentView === 'context' && (
+                                <ContextDiagnosticSection 
+                                    traditions={TRADITIONS}
+                                    onComplete={() => markComplete('context')}
+                                />
+                            )}
+                            {currentView === 'integration' && (
+                                <IntegrationSection 
+                                    traditions={TRADITIONS}
+                                    onComplete={() => markComplete('integration')}
+                                />
+                            )}
+                            {currentView === 'practice' && (
+                                <PracticeSection 
+                                    traditions={TRADITIONS}
+                                    onComplete={() => markComplete('practice')}
+                                />
+                            )}
+                        </div>
                     </main>
 
+                    {/* Footer */}
                     <footer className="bg-gray-800 text-white mt-16 py-8">
                         <div className="max-w-7xl mx-auto px-4 text-center">
-                            <p className="text-gray-400 text-sm">
-                                © 2025 Ethics Lab Enhanced Edition - Now with AI Tutor! 
-                                <br/>Click the 🤖 button to ask questions anytime.
-                            </p>
+                            <p className="text-lg font-semibold mb-2">Ethics Through the Meta-Constructor Lens</p>
+                            <p className="text-sm opacity-80">Module 1B: Historical Traditions</p>
                         </div>
                     </footer>
                 </div>
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // Overview Section
+        function OverviewSection({ onComplete }) {
+            useEffect(() => {
+                onComplete();
+            }, []);
+
+            return (
+                <div className="space-y-8">
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">The Core Insight</h2>
+                        <div className="prose prose-lg max-w-none">
+                            <p className="text-xl text-gray-700 leading-relaxed mb-6">
+                                <strong>The entire history of ethics can be reinterpreted as different attempts to 
+                                understand, protect, and enhance meta-constructor capacity</strong>—the ability to 
+                                examine and modify your own functioning while maintaining coherence.
+                            </p>
+
+                            <div className="bg-purple-50 border-l-4 border-purple-500 p-6 my-6">
+                                <h3 className="text-xl font-semibold text-purple-900 mb-2">The Unifying Framework</h3>
+                                <p className="text-gray-700 mb-3">
+                                    Different traditions emphasized different aspects, developed in different contexts, 
+                                    and worked better or worse depending on circumstances. The meta-constructor framework provides:
+                                </p>
+                                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                                    <li>Explains what each tradition was trying to achieve</li>
+                                    <li>Shows why each works in some contexts but not others</li>
+                                    <li>Integrates insights across traditions</li>
+                                    <li>Grounds everything in empirical evidence</li>
+                                </ul>
+                            </div>
+
+                            <h3 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">What You'll Explore</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-blue-900 mb-2">🔍 Tradition Explorer</h4>
+                                    <p className="text-sm text-gray-700">
+                                        Deep dive into each major ethical tradition with both traditional 
+                                        and meta-constructor interpretations
+                                    </p>
+                                </div>
+                                <div className="bg-green-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-green-900 mb-2">📅 Historical Timeline</h4>
+                                    <p className="text-sm text-gray-700">
+                                        See how ethical thinking evolved across cultures and centuries
+                                    </p>
+                                </div>
+                                <div className="bg-yellow-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-yellow-900 mb-2">⚖️ Comparison Tool</h4>
+                                    <p className="text-sm text-gray-700">
+                                        Compare multiple traditions side-by-side to see patterns and differences
+                                    </p>
+                                </div>
+                                <div className="bg-purple-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-purple-900 mb-2">🎯 Context Diagnostic</h4>
+                                    <p className="text-sm text-gray-700">
+                                        Learn which ethical approach works best in different situations
+                                    </p>
+                                </div>
+                                <div className="bg-pink-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-pink-900 mb-2">🧩 Integration Map</h4>
+                                    <p className="text-sm text-gray-700">
+                                        Visualize how traditions address different aspects of meta-constructor capacity
+                                    </p>
+                                </div>
+                                <div className="bg-orange-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-orange-900 mb-2">💡 Practice Scenarios</h4>
+                                    <p className="text-sm text-gray-700">
+                                        Apply different traditions to real ethical dilemmas
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-100 p-6 rounded-lg mt-8">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-3">The Key Shift</h3>
+                                <p className="text-gray-700 mb-4">
+                                    <strong>Traditional approach:</strong> "Which ethical theory is TRUE? Choose one and defend it."
+                                </p>
+                                <p className="text-gray-700">
+                                    <strong>Meta-constructor approach:</strong> "Which approach enhances meta-constructor 
+                                    capacity in which contexts? Integrate insights from all."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Explorer Section
+        function ExplorerSection({ traditions, selectedTradition, setSelectedTradition, onComplete }) {
+            const traditionList = Object.values(traditions);
+
+            useEffect(() => {
+                if (selectedTradition) {
+                    onComplete();
+                }
+            }, [selectedTradition]);
+
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Explore Ethical Traditions</h2>
+                        <p className="text-lg text-gray-700 mb-6">
+                            Click on any tradition to see both the traditional interpretation and the meta-constructor reinterpretation.
+                        </p>
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {traditionList.map(trad => (
+                                <div
+                                    key={trad.id}
+                                    onClick={() => setSelectedTradition(
+                                        selectedTradition?.id === trad.id ? null : trad
+                                    )}
+                                    className={`tradition-card bg-white border-2 rounded-lg p-6 ${
+                                        selectedTradition?.id === trad.id 
+                                            ? `border-${trad.color}-500 expanded` 
+                                            : 'border-gray-200'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between mb-3">
+                                        <span className="text-5xl">{trad.icon}</span>
+                                        <span className={`px-3 py-1 bg-${trad.color}-100 text-${trad.color}-800 text-xs rounded-full`}>
+                                            {trad.period}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-1">{trad.name}</h3>
+                                    <p className="text-sm text-gray-600 mb-2">{trad.tradition}</p>
+                                    <p className="text-purple-600 font-medium italic text-sm">{trad.tagline}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {selectedTradition && (
+                            <div className="mt-8 bg-gray-50 rounded-lg p-8">
+                                <button
+                                    onClick={() => setSelectedTradition(null)}
+                                    className="mb-6 text-purple-600 hover:text-purple-700 flex items-center"
+                                >
+                                    ← Back to all traditions
+                                </button>
+
+                                <div className="flex items-center space-x-4 mb-6">
+                                    <span className="text-6xl">{selectedTradition.icon}</span>
+                                    <div>
+                                        <h3 className="text-3xl font-bold text-gray-900">{selectedTradition.name}</h3>
+                                        <p className="text-lg text-gray-600">{selectedTradition.tradition}</p>
+                                        <p className="text-sm text-gray-500">{selectedTradition.period}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    {/* Traditional Interpretation */}
+                                    <div className="bg-white rounded-lg p-6 border-2 border-blue-200">
+                                        <h4 className="text-xl font-bold text-blue-900 mb-4">Traditional Interpretation</h4>
+                                        <p className="text-gray-700 mb-4 font-medium">{selectedTradition.traditional.summary}</p>
+                                        <h5 className="font-semibold text-gray-900 mb-2">Key Ideas:</h5>
+                                        <ul className="space-y-2">
+                                            {selectedTradition.traditional.keyIdeas.map((idea, i) => (
+                                                <li key={i} className="flex items-start">
+                                                    <span className="text-blue-500 mr-2">•</span>
+                                                    <span className="text-gray-700">{idea}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Meta-Constructor Interpretation */}
+                                    <div className="bg-white rounded-lg p-6 border-2 border-purple-200">
+                                        <h4 className="text-xl font-bold text-purple-900 mb-4">Meta-Constructor Reinterpretation</h4>
+                                        <p className="text-gray-700 mb-4 font-medium">{selectedTradition.metaConstructor.summary}</p>
+                                        <h5 className="font-semibold text-gray-900 mb-2">Concept Mappings:</h5>
+                                        <div className="space-y-3">
+                                            {selectedTradition.metaConstructor.mappings.map((mapping, i) => (
+                                                <div key={i} className="bg-purple-50 p-3 rounded">
+                                                    <p className="font-semibold text-purple-900 text-sm">{mapping.concept}</p>
+                                                    <p className="text-gray-700 text-sm">→ {mapping.mc}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Strengths and Limitations */}
+                                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                                    <div className="bg-green-50 p-6 rounded-lg">
+                                        <h5 className="font-semibold text-green-900 mb-3">✓ Strengths</h5>
+                                        <ul className="space-y-2">
+                                            {selectedTradition.metaConstructor.strengths.map((strength, i) => (
+                                                <li key={i} className="text-gray-700 text-sm">• {strength}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    <div className="bg-red-50 p-6 rounded-lg">
+                                        <h5 className="font-semibold text-red-900 mb-3">⚠ Limitations</h5>
+                                        <ul className="space-y-2">
+                                            {selectedTradition.metaConstructor.limitations.map((limitation, i) => (
+                                                <li key={i} className="text-gray-700 text-sm">• {limitation}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Modern Insight */}
+                                <div className="mt-6 bg-gradient-to-br from-purple-100 to-purple-50 p-6 rounded-lg border-2 border-purple-200">
+                                    <h5 className="font-semibold text-purple-900 mb-2">💡 Modern Insight</h5>
+                                    <p className="text-gray-700">{selectedTradition.metaConstructor.modernInsight}</p>
+                                </div>
+
+                                {/* When It Works */}
+                                <div className="mt-6 grid md:grid-cols-2 gap-6">
+                                    <div className="bg-blue-50 p-6 rounded-lg">
+                                        <h5 className="font-semibold text-blue-900 mb-3">Works Well In:</h5>
+                                        <ul className="space-y-2">
+                                            {selectedTradition.contexts.worksWell.map((context, i) => (
+                                                <li key={i} className="text-gray-700 text-sm">✓ {context}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    <div className="bg-orange-50 p-6 rounded-lg">
+                                        <h5 className="font-semibold text-orange-900 mb-3">Works Poorly In:</h5>
+                                        <ul className="space-y-2">
+                                            {selectedTradition.contexts.worksPoolyIn.map((context, i) => (
+                                                <li key={i} className="text-gray-700 text-sm">✗ {context}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Timeline Section
+        function TimelineSection({ traditions, onComplete }) {
+            const traditionList = Object.values(traditions).sort((a, b) => {
+                // Sort by period (rough chronological)
+                const periodA = parseInt(a.period.match(/-?\d+/)?.[0] || '0');
+                const periodB = parseInt(b.period.match(/-?\d+/)?.[0] || '0');
+                return periodA - periodB;
+            });
+
+            useEffect(() => {
+                onComplete();
+            }, []);
+
+            return (
+                <div className="space-y-8">
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Historical Timeline</h2>
+                        <p className="text-lg text-gray-700 mb-8">
+                            See how ethical thinking evolved across cultures and millennia, each tradition 
+                            grappling with different aspects of meta-constructor capacity.
+                        </p>
+
+                        <div className="space-y-8">
+                            {traditionList.map((trad, index) => (
+                                <div key={trad.id} className="timeline-item relative pl-16">
+                                    {index < traditionList.length - 1 && <div className="timeline-line"></div>}
+                                    
+                                    <div className="absolute left-0 top-0">
+                                        <div className={`w-12 h-12 bg-${trad.color}-100 rounded-full flex items-center justify-center border-4 border-white shadow-lg`}>
+                                            <span className="text-2xl">{trad.icon}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-gray-900">{trad.name}</h3>
+                                                <p className="text-gray-600">{trad.tradition}</p>
+                                            </div>
+                                            <span className={`px-3 py-1 bg-${trad.color}-100 text-${trad.color}-800 text-sm rounded-full font-medium`}>
+                                                {trad.period}
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="bg-purple-100 border-l-4 border-purple-500 p-4 mb-4">
+                                            <p className="text-purple-900 font-medium">{trad.tagline}</p>
+                                        </div>
+
+                                        <p className="text-gray-700 mb-3">{trad.metaConstructor.summary}</p>
+
+                                        <div className="flex items-center space-x-2 text-sm">
+                                            <span className={`px-2 py-1 bg-gray-200 text-gray-700 rounded`}>
+                                                Focus: {trad.level}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-12 bg-gradient-to-br from-purple-100 to-purple-50 p-8 rounded-lg">
+                            <h3 className="text-2xl font-bold text-purple-900 mb-4">The Pattern</h3>
+                            <p className="text-gray-700 mb-4">
+                                Across 2,500 years of ethical thinking, different traditions emphasized different aspects:
+                            </p>
+                            <ul className="space-y-2 text-gray-700">
+                                <li>• <strong>Ancient ethics</strong> focused on building stable patterns (constructors)</li>
+                                <li>• <strong>Enlightenment ethics</strong> emphasized universal principles and autonomy (meta-constructor capacity)</li>
+                                <li>• <strong>Modern ethics</strong> recognized context, relationships, and consequences</li>
+                                <li>• <strong>Contemporary ethics</strong> integrates these insights with empirical evidence</li>
+                            </ul>
+                            <p className="text-gray-700 mt-4">
+                                The meta-constructor framework shows how all these traditions were wrestling with 
+                                the same fundamental challenge: <strong>How do we develop and maintain the capacity 
+                                to live well and coordinate ethically?</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Comparison Section
+        function ComparisonSection({ traditions, compareSet, setCompareSet, onComplete }) {
+            const traditionList = Object.values(traditions);
+            const categories = [
+                'Traditional Summary',
+                'Meta-Constructor Interpretation',
+                'Primary Focus (Level)',
+                'Key Strength',
+                'Main Limitation',
+                'Works Best In'
+            ];
+
+            const toggleTradition = (trad) => {
+                if (compareSet.find(t => t.id === trad.id)) {
+                    setCompareSet(compareSet.filter(t => t.id !== trad.id));
+                } else if (compareSet.length < 3) {
+                    setCompareSet([...compareSet, trad]);
+                }
+            };
+
+            useEffect(() => {
+                if (compareSet.length >= 2) {
+                    onComplete();
+                }
+            }, [compareSet]);
+
+            return (
+                <div className="space-y-8">
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Compare Traditions</h2>
+                        <p className="text-lg text-gray-700 mb-6">
+                            Select 2-3 traditions to compare side-by-side. See how different approaches 
+                            address different aspects of meta-constructor capacity.
+                        </p>
+
+                        {/* Selection */}
+                        <div className="mb-8">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                Select Traditions (up to 3):
+                            </h3>
+                            <div className="flex flex-wrap gap-3">
+                                {traditionList.map(trad => (
+                                    <button
+                                        key={trad.id}
+                                        onClick={() => toggleTradition(trad)}
+                                        disabled={compareSet.length >= 3 && !compareSet.find(t => t.id === trad.id)}
+                                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                                            compareSet.find(t => t.id === trad.id)
+                                                ? `border-${trad.color}-500 bg-${trad.color}-50`
+                                                : 'border-gray-300 hover:border-gray-400'
+                                        } ${compareSet.length >= 3 && !compareSet.find(t => t.id === trad.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span className="text-2xl">{trad.icon}</span>
+                                        <span className="font-medium">{trad.name}</span>
+                                        {compareSet.find(t => t.id === trad.id) && (
+                                            <span className="text-green-500">✓</span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Comparison Table */}
+                        {compareSet.length >= 2 && (
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="p-4 text-left border font-semibold text-gray-900 sticky left-0 bg-gray-100">
+                                                Category
+                                            </th>
+                                            {compareSet.map(trad => (
+                                                <th key={trad.id} className={`p-4 text-left border bg-${trad.color}-50`}>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-3xl">{trad.icon}</span>
+                                                        <div>
+                                                            <p className="font-bold text-gray-900">{trad.name}</p>
+                                                            <p className="text-sm text-gray-600">{trad.tradition}</p>
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* Traditional Summary */}
+                                        <tr>
+                                            <td className="p-4 border font-semibold bg-gray-50 sticky left-0">
+                                                Traditional Summary
+                                            </td>
+                                            {compareSet.map(trad => (
+                                                <td key={trad.id} className="p-4 border comparison-cell">
+                                                    <p className="text-sm text-gray-700">{trad.traditional.summary}</p>
+                                                </td>
+                                            ))}
+                                        </tr>
+
+                                        {/* Meta-Constructor Interpretation */}
+                                        <tr className="bg-gray-50">
+                                            <td className="p-4 border font-semibold sticky left-0 bg-gray-50">
+                                                Meta-Constructor Interpretation
+                                            </td>
+                                            {compareSet.map(trad => (
+                                                <td key={trad.id} className="p-4 border comparison-cell">
+                                                    <p className="text-sm text-gray-700">{trad.metaConstructor.summary}</p>
+                                                </td>
+                                            ))}
+                                        </tr>
+
+                                        {/* Primary Focus */}
+                                        <tr>
+                                            <td className="p-4 border font-semibold bg-gray-50 sticky left-0">
+                                                Primary Focus (Level)
+                                            </td>
+                                            {compareSet.map(trad => (
+                                                <td key={trad.id} className="p-4 border comparison-cell">
+                                                    <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                                                        {trad.level}
+                                                    </span>
+                                                </td>
+                                            ))}
+                                        </tr>
+
+                                        {/* Key Strength */}
+                                        <tr className="bg-gray-50">
+                                            <td className="p-4 border font-semibold sticky left-0 bg-gray-50">
+                                                Key Strength
+                                            </td>
+                                            {compareSet.map(trad => (
+                                                <td key={trad.id} className="p-4 border comparison-cell">
+                                                    <p className="text-sm text-gray-700">{trad.metaConstructor.strengths[0]}</p>
+                                                </td>
+                                            ))}
+                                        </tr>
+
+                                        {/* Main Limitation */}
+                                        <tr>
+                                            <td className="p-4 border font-semibold bg-gray-50 sticky left-0">
+                                                Main Limitation
+                                            </td>
+                                            {compareSet.map(trad => (
+                                                <td key={trad.id} className="p-4 border comparison-cell">
+                                                    <p className="text-sm text-gray-700">{trad.metaConstructor.limitations[0]}</p>
+                                                </td>
+                                            ))}
+                                        </tr>
+
+                                        {/* Works Best In */}
+                                        <tr className="bg-gray-50">
+                                            <td className="p-4 border font-semibold sticky left-0 bg-gray-50">
+                                                Works Best In
+                                            </td>
+                                            {compareSet.map(trad => (
+                                                <td key={trad.id} className="p-4 border comparison-cell">
+                                                    <ul className="text-sm text-gray-700 space-y-1">
+                                                        {trad.contexts.worksWell.slice(0, 2).map((context, i) => (
+                                                            <li key={i}>• {context}</li>
+                                                        ))}
+                                                    </ul>
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        {compareSet.length < 2 && (
+                            <div className="text-center py-12 text-gray-500">
+                                Select at least 2 traditions to see comparison
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Context Diagnostic Section  
+        function ContextDiagnosticSection({ traditions, onComplete }) {
+            const [scenario, setScenario] = useState(null);
+            const [recommendations, setRecommendations] = useState([]);
+
+            const scenarios = [
+                {
+                    id: 1,
+                    title: 'Personal Character Development',
+                    description: 'You have stable circumstances, time, and resources. You want to develop yourself as an ethical person over the long term.',
+                    context: {
+                        stability: 'high',
+                        resources: 'high',
+                        timescale: 'long',
+                        scope: 'individual'
+                    },
+                    recommended: ['aristotle', 'confucius', 'buddha'],
+                    explanation: 'Stable contexts with time and resources are ideal for building constructor-level patterns through habituation (Aristotle), continuous cultivation (Confucius), and systematic mental training (Buddha).'
+                },
+                {
+                    id: 2,
+                    title: 'Institutional Reform',
+                    description: 'You\'re working to change organizational policies and structures to be more just and effective.',
+                    context: {
+                        stability: 'medium',
+                        resources: 'medium',
+                        timescale: 'medium',
+                        scope: 'institutional'
+                    },
+                    recommended: ['rawls', 'mill', 'dewey'],
+                    explanation: 'Institutional design requires frameworks for evaluating justice (Rawls), assessing outcomes empirically (Mill), and enabling collective learning and revision (Dewey).'
+                },
+                {
+                    id: 3,
+                    title: 'Crisis Response',
+                    description: 'You\'re facing an immediate ethical dilemma requiring quick decision-making under pressure.',
+                    context: {
+                        stability: 'low',
+                        resources: 'low',
+                        timescale: 'immediate',
+                        scope: 'individual'
+                    },
+                    recommended: ['kant', 'mill'],
+                    explanation: 'Crises require clear principles (Kant\'s categorical imperative) and quick assessment of likely consequences (utilitarian calculation). Long-term character development approaches are less helpful in the moment.'
+                },
+                {
+                    id: 4,
+                    title: 'Caregiving Relationship',
+                    description: 'You\'re caring for someone vulnerable (child, patient, elderly parent) and want to support their wellbeing and development.',
+                    context: {
+                        stability: 'medium',
+                        resources: 'medium',
+                        timescale: 'long',
+                        scope: 'relational'
+                    },
+                    recommended: ['gilligan', 'confucius', 'aristotle'],
+                    explanation: 'Caregiving contexts require relational attunement and context-sensitivity (care ethics), maintenance of supportive relationships (Confucius), and helping the other develop capabilities (Aristotle).'
+                },
+                {
+                    id: 5,
+                    title: 'Existential Life Transition',
+                    description: 'You\'re questioning your values, identity, and life direction. Nothing feels given or certain.',
+                    context: {
+                        stability: 'low',
+                        resources: 'medium',
+                        timescale: 'medium',
+                        scope: 'individual'
+                    },
+                    recommended: ['sartre', 'buddha', 'dewey'],
+                    explanation: 'Major transitions require examining patterns and creating meaning (Sartre), observing mental patterns without attachment (Buddha), and experimental learning from experience (Dewey).'
+                },
+                {
+                    id: 6,
+                    title: 'Unjust Social Context',
+                    description: 'You\'re operating in systematically oppressive conditions that degrade your capacity and agency.',
+                    context: {
+                        stability: 'low',
+                        resources: 'low',
+                        timescale: 'immediate',
+                        scope: 'social'
+                    },
+                    recommended: ['rawls', 'mill', 'gilligan'],
+                    explanation: 'Unjust contexts require structural analysis and reform (Rawls on justice), focus on outcomes that reduce suffering (Mill), and mutual support in relationships (care ethics). Individual character development is insufficient when context systematically degrades capacity.'
+                }
+            ];
+
+            const selectScenario = (scen) => {
+                setScenario(scen);
+                const recs = scen.recommended.map(id => traditions[id]);
+                setRecommendations(recs);
+                onComplete();
+            };
+
+            return (
+                <div className="space-y-8">
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Context Diagnostic</h2>
+                        <p className="text-lg text-gray-700 mb-6">
+                            Different ethical approaches work better in different contexts. Select a scenario to 
+                            see which traditions are most helpful.
+                        </p>
+
+                        <div className="grid md:grid-cols-2 gap-6 mb-8">
+                            {scenarios.map(scen => (
+                                <div
+                                    key={scen.id}
+                                    onClick={() => selectScenario(scen)}
+                                    className={`scenario-card bg-white border-2 rounded-lg p-6 cursor-pointer transition-all hover:shadow-lg ${
+                                        scenario?.id === scen.id ? 'border-purple-500 bg-purple-50' : 'border-gray-200'
+                                    }`}
+                                >
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{scen.title}</h3>
+                                    <p className="text-gray-700 text-sm mb-4">{scen.description}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                            {scen.context.stability} stability
+                                        </span>
+                                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                                            {scen.context.resources} resources
+                                        </span>
+                                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                                            {scen.context.timescale} timescale
+                                        </span>
+                                        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
+                                            {scen.context.scope} scope
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {scenario && (
+                            <div className="bg-gradient-to-br from-purple-100 to-purple-50 rounded-lg p-8">
+                                <h3 className="text-2xl font-bold text-purple-900 mb-4">
+                                    Recommended Approaches for: {scenario.title}
+                                </h3>
+                                <p className="text-gray-700 mb-6">{scenario.explanation}</p>
+
+                                <div className="grid md:grid-cols-3 gap-6">
+                                    {recommendations.map(trad => (
+                                        <div key={trad.id} className="bg-white rounded-lg p-6 shadow">
+                                            <div className="flex items-center space-x-3 mb-4">
+                                                <span className="text-4xl">{trad.icon}</span>
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900">{trad.name}</h4>
+                                                    <p className="text-sm text-gray-600">{trad.tradition}</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-purple-900 font-medium mb-2">{trad.tagline}</p>
+                                            <p className="text-sm text-gray-700">{trad.metaConstructor.summary}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-6 bg-white p-6 rounded-lg">
+                                    <h4 className="font-semibold text-gray-900 mb-2">How to Use These Approaches:</h4>
+                                    <ul className="space-y-2 text-gray-700 text-sm">
+                                        {recommendations.map(trad => (
+                                            <li key={trad.id}>
+                                                <strong>{trad.name}:</strong> {trad.metaConstructor.strengths[0]}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Integration Section
+        function IntegrationSection({ traditions, onComplete }) {
+            useEffect(() => {
+                onComplete();
+            }, []);
+
+            const levelMapping = {
+                'capacity': [],
+                'capability': [],
+                'constructor': [],
+                'meta-constructor': []
+            };
+
+            Object.values(traditions).forEach(trad => {
+                levelMapping[trad.level].push(trad);
+            });
+
+            return (
+                <div className="space-y-8">
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Integration Map</h2>
+                        <p className="text-lg text-gray-700 mb-8">
+                            See how different traditions address different aspects of the capacity → capability → 
+                            constructor → meta-constructor progression.
+                        </p>
+
+                        {/* Visual Map */}
+                        <div className="space-y-6">
+                            {Object.entries(levelMapping).map(([level, trads]) => (
+                                <div key={level} className="bg-gray-50 rounded-lg p-6">
+                                    <div className="flex items-center mb-4">
+                                        <div className="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                                            {level.toUpperCase()}
+                                        </div>
+                                        <div className="ml-4 text-gray-600 italic">
+                                            {level === 'capacity' && 'What\'s latent but suppressed'}
+                                            {level === 'capability' && 'What\'s reliably performed'}
+                                            {level === 'constructor' && 'What persists and repeats'}
+                                            {level === 'meta-constructor' && 'What can examine and improve itself'}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-3 gap-4">
+                                        {trads.map(trad => (
+                                            <div key={trad.id} className="integration-node bg-white rounded-lg p-4 shadow hover:shadow-lg">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <span className="text-3xl">{trad.icon}</span>
+                                                    <div>
+                                                        <p className="font-bold text-gray-900">{trad.name}</p>
+                                                        <p className="text-xs text-gray-600">{trad.tradition}</p>
+                                                    </div>
+                                                </div>
+                                                <p className="text-sm text-gray-700">{trad.tagline}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Synthesis */}
+                        <div className="mt-12 bg-gradient-to-br from-purple-100 to-purple-50 p-8 rounded-lg">
+                            <h3 className="text-2xl font-bold text-purple-900 mb-4">The Integration</h3>
+                            <div className="space-y-4 text-gray-700">
+                                <p>
+                                    <strong>None of these traditions is "right" or "wrong"</strong>—each captures a different 
+                                    aspect of meta-constructor capacity:
+                                </p>
+                                <ul className="space-y-2 ml-4">
+                                    <li>• <strong>Capacity-level insights:</strong> Existentialism and Buddhism show us latent potential 
+                                    for self-examination and authentic creation</li>
+                                    <li>• <strong>Capability-level insights:</strong> Virtue ethics, care ethics, and utilitarianism 
+                                    help us build reliable ethical functioning</li>
+                                    <li>• <strong>Constructor-level insights:</strong> Confucianism and virtue ethics show how to 
+                                    create persistent patterns that maintain themselves</li>
+                                    <li>• <strong>Meta-constructor-level insights:</strong> Kant, Rawls, Dewey, and Buddhism provide 
+                                    tools for examining and improving our ethical functioning itself</li>
+                                </ul>
+                                <p className="pt-4 border-t border-purple-200">
+                                    <strong>The key shift:</strong> Rather than asking "Which theory is TRUE?" we ask 
+                                    "Which approach enhances meta-constructor capacity in which contexts?" This allows us to 
+                                    <strong> integrate insights from all traditions</strong> while understanding their contextual 
+                                    limitations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Practice Section
+        function PracticeSection({ traditions, onComplete }) {
+            const [currentCase, setCurrentCase] = useState(null);
+            const [responses, setResponses] = useState({});
+
+            const cases = [
+                {
+                    id: 1,
+                    title: 'The Whistleblower Dilemma',
+                    scenario: 'You discover your company is deceiving customers about product safety. Reporting it could cost you your job and harm your family. Staying silent allows harm to continue.',
+                    question: 'How would different ethical traditions analyze this situation?',
+                    traditions: {
+                        kant: 'Kant would emphasize the categorical imperative: Can you will that everyone deceive customers when it benefits them? No—so you have a duty to report. Treating customers as mere means (deceiving them) violates their dignity. Your duty is clear regardless of consequences to you.',
+                        mill: 'Mill would focus on consequences: Calculate the harm of continued deception (many customers at risk) vs. harm to your family (significant but limited). The greatest good for greatest number likely requires reporting, but we should also consider whether you could report anonymously to reduce harm to yourself.',
+                        aristotle: 'Aristotle would ask about your character: What would a person of practical wisdom (phronesis) do? A virtuous person has courage to do the right thing and justice to refuse complicity. But practical wisdom also considers context—can you find a way to stop the harm while protecting your family?',
+                        gilligan: 'Care ethics would emphasize your relationships and context: You have responsibilities to customers (care for strangers who are harmed), to your company (loyalty but not complicity), and to your family (their wellbeing). How can you meet all these responsibilities? Perhaps reporting while seeking support?'
+                    },
+                    integration: 'An integrated approach recognizes you have principled duties (Kant), must consider consequences (Mill), should act from developed character (Aristotle), and must navigate relationships (care ethics). The key is diagnosing your context: Do you have meta-constructor capacity to examine options and find creative solutions? Or has the situation degraded your capacity (fear, pressure) requiring external support first?'
+                },
+                {
+                    id: 2,
+                    title: 'Resource Allocation Crisis',
+                    scenario: 'Your hospital has one ventilator left and two patients who need it. Patient A is 80 years old with poor prognosis. Patient B is 40 years old with better chances. Both will likely die without it.',
+                    question: 'How would different traditions guide this tragic choice?',
+                    traditions: {
+                        mill: 'Utilitarianism would calculate: Patient B has more years of life to gain, better quality of life prognosis, perhaps dependents. Maximizing wellbeing suggests prioritizing B. But we should also consider: Does this create precedent that devalues elderly lives systematically?',
+                        kant: 'Kant would struggle with this: Both patients have equal dignity as rational beings. You cannot use A as mere means to save B. Perhaps the only ethical option is random selection (lottery) since both have equal moral status. Or: Could both be given sequential access rather than zero-sum?',
+                        rawls: 'Rawls would ask what principle you would choose from behind a veil of ignorance (not knowing if you\'re A or B). Perhaps: maximize expected years of life, but with protections ensuring elderly aren\'t systematically deprioritized. Consider whether age-based allocation violates equal basic liberties.',
+                        gilligan: 'Care ethics would emphasize the particular contexts: What do A and B want? Do they have families with input? Is this a one-time crisis or system failure? Rather than abstract principles, attune to the specific people and relationships involved. Perhaps the decision should involve family consultation.'
+                    },
+                    integration: 'This tragic choice reveals limits of any single approach. Utilitarian calculation seems heartless; Kantian dignity seems impractical; care ethics might not resolve the dilemma. An integrated approach acknowledges: (1) the context degrading meta-constructor capacity (crisis overwhelms deliberation), (2) need for fair procedures decided in advance (Rawls), (3) recognition of genuine tragedy (not all dilemmas have "right" answers), (4) importance of transparent reasoning whatever is chosen.'
+                },
+                {
+                    id: 3,
+                    title: 'Cultural Practice Conflict',
+                    scenario: 'You\'re a physician. A family refuses medical treatment for their child based on religious beliefs. The child will likely suffer serious harm without treatment, but respecting religious freedom is important.',
+                    question: 'How do different traditions approach conflicts between autonomy and harm?',
+                    traditions: {
+                        kant: 'Kant would distinguish: Parents have autonomy, but children also have dignity. You cannot treat the child as mere means to express parents\' religious freedom. The child\'s capacity for rational autonomy (future) must be protected. Kant would likely require treatment despite parents\' objections.',
+                        mill: 'Mill\'s harm principle: Adults can refuse treatment for themselves (their liberty), but cannot impose serious harm on others. The child cannot consent and will suffer irreversible harm. Mill would allow intervention to prevent harm to the child, while respecting maximum adult liberty.',
+                        confucius: 'Confucian ethics would emphasize relationships and social harmony: Can you find a way to respect the family\'s beliefs while protecting the child? Perhaps dialogue to understand their concerns, seeking middle ground, involving religious community leaders. Relationships should be maintained where possible.',
+                        rawls: 'Rawls would ask: What basic liberties take precedence? Religious freedom is fundamental, but so is bodily integrity and health. From original position (not knowing if you\'re parent or child), you would likely prioritize child\'s welfare since they cannot advocate for themselves.'
+                    },
+                    integration: 'This case requires recognizing multiple levels: (1) Immediate capacity question (is the child\'s meta-constructor capacity being permanently damaged?), (2) Contextual sensitivity (understanding the family\'s worldview), (3) Principled grounding (protecting those who cannot protect themselves), (4) Relational approach (can dialogue find creative solutions?). An integrated approach would exhaust dialogue options while clearly prioritizing child welfare if necessary.'
+                }
+            ];
+
+            const selectCase = (caseItem) => {
+                setCurrentCase(caseItem);
+                if (!responses[caseItem.id]) {
+                    setResponses({ ...responses, [caseItem.id]: {} });
+                }
+                onComplete();
+            };
+
+            return (
+                <div className="space-y-8">
+                    <div className="bg-white rounded-lg shadow-lg p-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Practice Scenarios</h2>
+                        <p className="text-lg text-gray-700 mb-6">
+                            Apply different ethical traditions to real dilemmas. See how each tradition offers 
+                            different insights and how integration provides fuller understanding.
+                        </p>
+
+                        <div className="grid md:grid-cols-3 gap-6 mb-8">
+                            {cases.map(caseItem => (
+                                <div
+                                    key={caseItem.id}
+                                    onClick={() => selectCase(caseItem)}
+                                    className={`bg-white border-2 rounded-lg p-6 cursor-pointer transition-all hover:shadow-lg ${
+                                        currentCase?.id === caseItem.id ? 'border-purple-500 bg-purple-50' : 'border-gray-200'
+                                    }`}
+                                >
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{caseItem.title}</h3>
+                                    <p className="text-gray-700 text-sm">{caseItem.scenario}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {currentCase && (
+                            <div className="bg-gray-50 rounded-lg p-8">
+                                <button
+                                    onClick={() => setCurrentCase(null)}
+                                    className="mb-6 text-purple-600 hover:text-purple-700 flex items-center"
+                                >
+                                    ← Back to cases
+                                </button>
+
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">{currentCase.title}</h3>
+                                <div className="bg-white p-6 rounded-lg mb-6">
+                                    <h4 className="font-semibold text-gray-900 mb-2">Scenario:</h4>
+                                    <p className="text-gray-700 mb-4">{currentCase.scenario}</p>
+                                    <h4 className="font-semibold text-gray-900 mb-2">Question:</h4>
+                                    <p className="text-purple-700 font-medium">{currentCase.question}</p>
+                                </div>
+
+                                <h4 className="text-xl font-bold text-gray-900 mb-4">Perspectives from Different Traditions:</h4>
+                                <div className="space-y-4 mb-6">
+                                    {Object.entries(currentCase.traditions).map(([tradId, analysis]) => {
+                                        const trad = traditions[tradId];
+                                        return (
+                                            <div key={tradId} className="bg-white rounded-lg p-6 border-l-4 border-purple-500">
+                                                <div className="flex items-center space-x-3 mb-3">
+                                                    <span className="text-3xl">{trad.icon}</span>
+                                                    <div>
+                                                        <h5 className="font-bold text-gray-900">{trad.name}</h5>
+                                                        <p className="text-sm text-gray-600">{trad.tradition}</p>
+                                                    </div>
+                                                </div>
+                                                <p className="text-gray-700">{analysis}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="bg-gradient-to-br from-purple-100 to-purple-50 rounded-lg p-6">
+                                    <h4 className="text-xl font-bold text-purple-900 mb-3">Integrated Analysis</h4>
+                                    <p className="text-gray-700">{currentCase.integration}</p>
+                                </div>
+
+                                <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded">
+                                    <h4 className="font-semibold text-yellow-900 mb-2">Reflection Question:</h4>
+                                    <p className="text-gray-700 mb-3">
+                                        Which tradition's analysis resonates most with you for this case? Why? 
+                                        What would YOU do in this situation, and which combination of insights 
+                                        would guide you?
+                                    </p>
+                                    <p className="text-sm text-gray-600 italic">
+                                        Consider discussing this with classmates or journaling your response.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
